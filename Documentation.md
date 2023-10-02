@@ -1,82 +1,116 @@
-# Automating My Vagrant Ubuntu Cluster with LAMP Stack and Nginx Load Balancer
+# Vagrant Ubuntu Cluster with LAMP Stack on Master and Slave Nodes, and Load Balancer
 
-Hello! I'm thrilled to guide you through setting up an entirely automated Vagrant-based Ubuntu cluster with a LAMP (Linux, Apache, MySQL, PHP) stack and an Nginx load balancer. This meticulously crafted script will take care of everything effortlessly.
+## Table of Contents
 
-## Getting Started
+1. [Introduction](#introduction)
+2. [Prerequisites](#prerequisites)
+3. [Getting Started](#getting-started)
+4. [Script Overview](#script-overview)
+5. [Usage](#usage)
+6. [Troubleshooting](#troubleshooting)
+7. [Notes](#notes)
 
-Before we dive into the script, let's ensure I have everything I need:
+## 1. Introduction
 
-- *Vagrant*: This essential tool will manage my virtual machines.
-- *VirtualBox*: VirtualBox, my trusted virtualization provider for Vagrant. If I'm on Windows, I'll consider using the Windows Subsystem for Linux (WSL) or a Linux-based environment.
+This documentation provides a comprehensive guide for setting up a Vagrant cluster with two nodes: one acting as a master and the other as a slave. Both nodes are configured with a LAMP (Linux, Apache, MySQL, PHP) stack. Additionally, a load balancer is installed on the master node using Nginx to distribute incoming traffic between the master and slave nodes.
 
-## The Script in Detail
+## 2. Prerequisites
 
-Let's delve into each step of the script, which is fully automated:
+Before you begin, ensure you have the following prerequisites:
 
-### 1. Installing Dependencies (Commented Out)
+- [Vagrant](https://www.vagrantup.com/) installed.
+- [VirtualBox](https://www.virtualbox.org/) installed.
+- A Windows test environment (if running on Windows).
 
-In a Linux environment, I'd check if Vagrant and VirtualBox are installed and install them if necessary. However, this part is skipped on Windows.
+## 3. Getting Started
 
-### 2. Removing Existing Vagrantfile
+Follow these steps to set up the Vagrant cluster with the LAMP stack and load balancer:
 
-I start fresh by removing any old Vagrantfile in the current directory.
+1. Clone this repository or copy the Bash script to your local machine.
 
-### 3. Creating a New Vagrantfile
+2. Open a terminal and navigate to the directory containing the script.
 
-I create a fresh Vagrantfile that defines how my virtual machines will be set up.
+3. Make the script executable:
 
-### 4. Configuring Vagrantfile
+   ```bash
+   chmod +x deploy_ubuntu_cluster.sh
+   ```
 
-This is where the magic happens. I configure my Vagrantfile to create two virtual machines: a master node and a slave node, both based on the "bento/ubuntu-20.04" box.
+4. Run the script:
 
-### 5. Provisioning the Master Node
+   ```bash
+   ./deploy_ubuntu_cluster.sh
+   ```
 
-I dive into the master node's setup, which is fully automated. Here are the key details:
+5. Follow the on-screen instructions during script execution.
 
-- I install essential packages like Apache, MySQL, PHP, and Nginx.
-- I create a new user, grant them sudo privileges, and enable password-less SSH.
-- I set up a sample PHP file for validation.
-- I configure it to run `ps aux` on startup.
+## 4. Script Overview
 
-### 6. Provisioning the Slave Node
+The script is designed to automate the setup of a Vagrant cluster with specific configurations. Here's a detailed breakdown of the script's actions:
 
-The slave node receives similar treatment with package installations and SSH key setup. I also ensure seamless SSH communication from the master.
+### 4.1. Dependency Checks (Optional)
 
-### 7. Configuring Nginx as Load Balancer
+- The script checks for the presence of required dependencies, such as Vagrant and VirtualBox. Note that dependency installation is commented out, as it's tailored for Ubuntu environments. You may uncomment and adapt these sections if you run the script on Ubuntu.
 
-Nginx plays a pivotal role in my setup. I configure it as a load balancer, distributing traffic between the master and slave nodes for redundancy and scalability.
+### 4.2. Directory Creation
 
-### 8. Testing and Verification
+- The script creates a `Shared_folder` directory where shared files between the nodes will be stored.
 
-To ensure everything runs smoothly, I perform automated checks on both nodes. I verify the creation of directories, files, and content to guarantee an error-free setup.
+### 4.3. Vagrantfile Management
 
-### 9. Access Information
+- Checks for the existence of a `Vagrantfile` and removes it if present.
+- Creates a new `Vagrantfile` with predefined configuration settings.
 
-I provide you with URLs to access the load balancer and the PHP info page.
+### 4.4. Node Configuration and Provisioning
 
-## Running the Script
+- The script defines two nodes: "master" and "slave," each with specific settings and provisioning scripts.
+- Both nodes are configured with the LAMP stack.
 
-To get started:
+#### Master Node
 
-1. Make sure I've met the prerequisites.
-2. I place this script in the directory where I want to set up my Vagrant cluster.
-3. I run the script using my Bash shell.
+- Updates the master node and upgrades its packages.
+- Creates a user called "altschool" with root privileges.
+- Generates an SSH key pair for the "altschool" user without a passphrase.
+- Installs Apache, MySQL, PHP, and other required packages.
+- Starts and enables Apache and secures MySQL.
+- Creates a sample PHP file for validation.
+- Creates a directory `/mnt/altschool/` and a test file within it.
+- Copies content to the shared folder for access from other nodes.
+- Installs Nginx as a load balancer.
 
-## Accessing the Services
+#### Slave Node
 
-Here are the URLs to access my services:
+- Updates the slave node and upgrades its packages.
+- Copies the public key from the shared folder and appends it to the `authorized_keys` file.
+- Creates a directory `/mnt/altschool/slave/`.
+- Copies content from the shared folder to the slave directory.
 
-- *Load Balancer*: [http://192.168.33.10/load-balancer.html](http://192.168.33.10/load-balancer.html)
-- *PHP Info Page*: [http://192.168.33.10/info.php](http://192.168.33.10/info.php)
+### 4.5. Cluster Start-Up
 
-## Troubleshooting
+- Initiates the start and provisioning of both master and slave nodes.
+- Checks if the Vagrant cluster starts successfully.
 
-If I encounter any issues along the way, I'll double-check that I've met the prerequisites and review this script for potential errors.
+### 4.6. SSH into Nodes for Validation
 
-## Conclusion
+- SSHs into the master and slave nodes to perform various validations.
+- Checks for the existence of directories and files.
+- Validates the content of the test files.
 
-This script is my trusty companion for automating the setup of a Vagrant-based cluster with a LAMP stack and an Nginx load balancer. It takes care of everything, providing a hassle-free clustered development environment.
+## 5. Usage
 
-Feel free to customize this script to suit your specific needs or expand upon it to include additional configurations.
+Upon successful completion of the script, you can access the following resources:
 
-*Deployment completed successfully. Enjoy your fully automated clustered development journey!*
+- Load Balancer: http://192.168.33.10/load-balancer.html
+- PHP Info: http://192.168.33.10/info.php
+
+## 6. Troubleshooting
+
+If you encounter any issues during the script execution, consider the following troubleshooting steps:
+
+- Ensure that Vagrant and VirtualBox are installed correctly.
+- Review the script's output and error messages for clues on what went wrong.
+
+## 7. Notes
+
+- The script contains conditional checks for dependency installation, which are commented out since they are tailored for Ubuntu environments. Uncomment and adapt these sections if you run the script on Ubuntu.
+- Nginx is installed as the load balancer, but the configuration to start and enable it is commented out. Uncomment and configure it as needed.

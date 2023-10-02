@@ -56,8 +56,6 @@ Vagrant.configure("2") do |config|
     master.vm.hostname = "master-node"
     master.vm.network "private_network", ip: "192.168.33.10"
 
-    # Automatically display an overview of the Linux process management, showcasing currently running processes on startup
-    master.vm.provision "shell", inline: "ps aux"
     master.vm.provider "virtualbox" do |vb|
       vb.memory = "2048"
       vb.cpus = "2"
@@ -83,7 +81,7 @@ Vagrant.configure("2") do |config|
 
       # Copy the public key to the shared folder
       echo "Copying the public key to the shared folder."
-      sudo cp /home/altschool/.ssh/id_rsa.pub /vagrant/master_id_rsa.pub
+      sudo cp /home/altschool/.ssh/id_rsa.pub /vagrant/master_id_rsa.pub || true
 
       # Install Apache, MySQL, PHP, and other required packages
       echo "Installing Apache, MySQL, PHP, and other required packages."
@@ -136,7 +134,7 @@ Vagrant.configure("2") do |config|
 
       # Configure nginx as a load balancer for the master and slave nodes
       echo "Configuring nginx as a load balancer for the master and slave nodes."
-      sudo rm /etc/nginx/sites-enabled/default
+      sudo rm /etc/nginx/sites-enabled/default || true
 
       # Create a new nginx configuration file
       echo "Creating a new nginx configuration file."
