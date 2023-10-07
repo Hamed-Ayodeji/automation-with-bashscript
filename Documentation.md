@@ -2,13 +2,13 @@
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Prerequisites](#prerequisites)
-3. [Getting Started](#getting-started)
-4. [Script Overview](#script-overview)
-5. [Usage](#usage)
-6. [Troubleshooting](#troubleshooting)
-7. [Notes](#notes)
+1. [Introduction](#1-introduction)
+2. [Prerequisites](#2-prerequisites)
+3. [Getting Started](#3-getting-started)
+4. [Script Overview](#4-script-overview)
+5. [Usage](#5-usage)
+6. [Troubleshooting](#6-troubleshooting)
+7. [Notes](#7-notes)
 
 ## 1. Introduction
 

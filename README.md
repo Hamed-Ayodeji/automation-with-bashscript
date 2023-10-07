@@ -34,8 +34,8 @@ Before running this script, ensure you have the following prerequisites:
 
 6. Upon successful completion, you can access the following resources:
 
-   - Load Balancer: http://192.168.33.10/load-balancer.html
-   - PHP Info: http://192.168.33.10/info.php
+   - Load Balancer: [http://192.168.33.10/load-balancer.html](http://192.168.33.10/load-balancer.html)
+   - PHP Info: [http://192.168.33.10/info.php](http://192.168.33.10/info.php)
 
 ## Script Explanation
 
