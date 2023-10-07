@@ -93,6 +93,7 @@ The script is designed to automate the setup of a Vagrant cluster with specific 
 ### 4.6. SSH into Nodes for Validation
 
 - SSHs into the master and slave nodes to perform various validations.
+- Creates a cron job that run the ps aux command at every boot.
 - Checks for the existence of directories and files.
 - Validates the content of the test files.
 

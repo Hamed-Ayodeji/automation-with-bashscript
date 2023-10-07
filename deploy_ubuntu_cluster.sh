@@ -290,9 +290,9 @@ vagrant ssh master -c "
 echo 'Welcome to the Vagrant Ubuntu Cluster with LAMP Stack and a Load balancer using nginx to allow for traffic to the LAMP using the master and the slave nodes.'
 echo 'Deployment completed successfully.'
 
-# Display an overview of the Linux process management, showcasing currently running processes
-echo 'Displaying an overview of the Linux process management, showcasing currently running processes.'
-ps aux
+# Create a cronjob that display an overview of the Linux process management, showcasing currently running processes on every boot
+echo 'Creating a cronjob that displays an overview of the Linux process management, showcasing currently running processes on every boot.'
+sudo crontab -u altschool -l | { cat; echo "@reboot ps -aux"; } | sudo crontab -u altschool - || true
 
 # Check if the /mnt/altschool/ directory exists
 if [ -d /mnt/altschool/ ]; then

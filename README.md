@@ -53,6 +53,7 @@ The script performs the following actions:
 
 6. SSHs into the master node to perform the following tasks:
    - Display an overview of running processes.
+   - Creates a cron job that runs the ps aux command at every boot
    - Checks for the existence of directories and files.
    - Validates the content of the test file.
 
