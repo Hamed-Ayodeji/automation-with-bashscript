@@ -1,117 +1,108 @@
-# Vagrant Ubuntu Cluster with LAMP Stack on Master and Slave Nodes, and Load Balancer
+# Comprehensive Documentation for the "deploy_ubuntu_cluster.sh" Bash Script
+
+Welcome to the comprehensive documentation for the `deploy_ubuntu_cluster.sh` Bash script. This documentation provides a detailed explanation of the script's purpose and functionality, as well as step-by-step instructions for setting up a Vagrant environment with three nodes: a master node, a slave node, and a load balancer node. The nodes are configured with a LAMP (Linux, Apache, MySQL, PHP) stack, and the load balancer node is equipped with Nginx for efficient traffic distribution.
 
 ## Table of Contents
 
 1. [Introduction](#1-introduction)
 2. [Prerequisites](#2-prerequisites)
-3. [Getting Started](#3-getting-started)
-4. [Script Overview](#4-script-overview)
-5. [Usage](#5-usage)
-6. [Troubleshooting](#6-troubleshooting)
-7. [Notes](#7-notes)
+3. [Script Overview](#3-script-overview)
+    - [Installation of Dependencies](#31-installation-of-dependencies)
+    - [Directory and File Operations](#32-directory-and-file-operations)
+    - [Vagrant Configuration](#33-vagrant-configuration)
+    - [Provisioning the Master Node](#34-provisioning-the-master-node)
+    - [Provisioning the Slave Node](#35-provisioning-the-slave-node)
+    - [Provisioning the Load Balancer Node](#36-provisioning-the-load-balancer-node)
+4. [Running the Script](#4-running-the-script)
+5. [Accessing the Web Pages](#5-accessing-the-web-pages)
+6. [Conclusion](#6-conclusion)
 
 ## 1. Introduction
 
-This documentation provides a comprehensive guide for setting up a Vagrant cluster with two nodes: one acting as a master and the other as a slave. Both nodes are configured with a LAMP (Linux, Apache, MySQL, PHP) stack. Additionally, a load balancer is installed on the master node using Nginx to distribute incoming traffic between the master and slave nodes.
+The `deploy_ubuntu_cluster.sh` Bash script automates the setup of a Vagrant environment, creating a multi-node cluster. The objective is to orchestrate the automated deployment of two Vagrant-based Ubuntu systems, designated as 'Master and Slave' with an integrated LAMP stack on both systems and a lot of other specifications one of which is creating a load balancer using Nginx to allow for traffic to the LAMP using the master and the slave nodes. The environment consists of three nodes:
+
+- A **Master Node**: Running a LAMP stack.
+- A **Slave Node**: Also running a LAMP stack.
+- A **Load Balancer Node**: Configured with Nginx to distribute incoming web traffic to the master and slave nodes.
+
+This documentation will guide you through the entire process.
 
 ## 2. Prerequisites
 
-Before you begin, ensure you have the following prerequisites:
+Before using this script, make sure you have the following prerequisites:
 
-- [Vagrant](https://www.vagrantup.com/) installed.
-- [VirtualBox](https://www.virtualbox.org/) installed.
-- A Windows test environment (if running on Windows).
+- **Vagrant**: Install Vagrant from [here](https://www.vagrantup.com/downloads).
 
-## 3. Getting Started
+- **VirtualBox**: Install VirtualBox from [here](https://www.virtualbox.org/).
 
-Follow these steps to set up the Vagrant cluster with the LAMP stack and load balancer:
+- A **Linux Environment**: This script is intended for a Linux-based environment.
 
-1. Clone this repository or copy the Bash script to your local machine.
+## 3. Script Overview
 
-2. Open a terminal and navigate to the directory containing the script.
+The script is divided into several sections, each addressing different aspects of the environment setup. The following sections provide a brief overview of each section.
 
-3. Make the script executable:
+### 3.1 Installation of Dependencies
 
-   ```bash
-   chmod +x deploy_ubuntu_cluster.sh
-   ```
+This section ensures that the required dependencies (Vagrant and VirtualBox) are installed. If not already installed, the script automatically installs them. It also checks if the Vagrant environment is already running and stops it if it is. This is to ensure that the script runs smoothly without any errors.
 
-4. Run the script:
+### 3.2 Directory and File Operations
 
-   ```bash
-   ./deploy_ubuntu_cluster.sh
-   ```
+This section manages the project directory structure. It removes previous Vagrant-related files and directories and creates the necessary project structure. It also copies the Vagrantfile and the provisioning script to the project directory. The script also creates a shared folder for data sharing between the master and slave nodes. The shared folder is created in the project directory and is accessible from both the master and slave nodes.
 
-5. Follow the on-screen instructions during script execution.
+### 3.3 Vagrant Configuration
 
-## 4. Script Overview
+The script defines the Vagrantfile to configure the virtual machines. It specifies settings for the master, slave, and load balancer nodes, including hostname, IP addresses, and resource allocation.
 
-The script is designed to automate the setup of a Vagrant cluster with specific configurations. Here's a detailed breakdown of the script's actions:
+### 3.4 Provisioning the Master Node
 
-### 4.1. Dependency Checks (Optional)
+This part configures the master node and includes several essential tasks:
 
-- The script checks for the presence of required dependencies, such as Vagrant and VirtualBox. Note that dependency installation is commented out, as it's tailored for Ubuntu environments. You may uncomment and adapt these sections if you run the script on Ubuntu.
+- Updating and upgrading the master node's packages.
+- Creating a user account named 'altschool' with root privileges.
+- Generating an SSH key pair for the 'altschool' user (without a passphrase).
+- Installing Apache, MySQL, PHP, and other required packages.
+- Starting and enabling Apache and MySQL services.
+- Creating a sample PHP file for validation.
+- Creating a test file and copying it to a shared folder for data sharing.
 
-### 4.2. Directory Creation
+### 3.5 Provisioning the Slave Node
 
-- The script creates a `Shared_folder` directory where shared files between the nodes will be stored.
+This section replicates the software stack on the slave node and configures SSH key access:
 
-### 4.3. Vagrantfile Management
+- Copying the public key from the shared folder to the slave node and appending it to the authorized_keys file in the `.ssh` directory.
+- Creating directories for shared data.
+- Copying the content of the shared folder to the slave node's directories.
 
-- Checks for the existence of a `Vagrantfile` and removes it if present.
-- Creates a new `Vagrantfile` with predefined configuration settings.
+### 3.6 Provisioning the Load Balancer Node
 
-### 4.4. Node Configuration and Provisioning
+This section configures the load balancer node using Nginx:
 
-- The script defines two nodes: "master" and "slave," each with specific settings and provisioning scripts.
-- Both nodes are configured with the LAMP stack.
+- Installing Nginx.
+- Creating an Nginx configuration file for load balancing.
+- Creating a symbolic link to the configuration file.
+- Creating an HTML file to test the load balancer page.
+- Starting and enabling Nginx.
 
-#### Master Node
+## 4. Running the Script
 
-- Updates the master node and upgrades its packages.
-- Creates a user called "altschool" with root privileges.
-- Generates an SSH key pair for the "altschool" user without a passphrase.
-- Installs Apache, MySQL, PHP, and other required packages.
-- Starts and enables Apache and secures MySQL.
-- Creates a sample PHP file for validation.
-- Creates a directory `/mnt/altschool/` and a test file within it.
-- Copies content to the shared folder for access from other nodes.
-- Installs Nginx as a load balancer.
+Before running the script, make sure you are in the same directory as the script file. Execute the script by running:
 
-#### Slave Node
+```bash
+./deploy_ubuntu_cluster.sh
+```
 
-- Updates the slave node and upgrades its packages.
-- Copies the public key from the shared folder and appends it to the `authorized_keys` file.
-- Creates a directory `/mnt/altschool/slave/`.
-- Copies content from the shared folder to the slave directory.
+This will start the process of creating the virtual machines and configuring the environment.
 
-### 4.5. Cluster Start-Up
+## 5. Accessing the Web Pages
 
-- Initiates the start and provisioning of both master and slave nodes.
-- Checks if the Vagrant cluster starts successfully.
+You can access the web pages once the servers are up and running. Use the following URLs in your web browser:
 
-### 4.6. SSH into Nodes for Validation
+- **Load Balancer Page**: Access the load balancer page at [http://192.168.56.7/load-balancer.html](http://192.168.56.7/load-balancer.html).
 
-- SSHs into the master and slave nodes to perform various validations.
-- Creates a cron job that run the ps aux command at every boot.
-- Checks for the existence of directories and files.
-- Validates the content of the test files.
+- **PHP Info Page**: Access the PHP info page at [http://192.168.56.5/info.php](http://192.168.56.5/info.php).
 
-## 5. Usage
+## 6. Conclusion
 
-Upon successful completion of the script, you can access the following resources:
+This comprehensive documentation provides an in-depth understanding of the `deploy_ubuntu_cluster.sh` Bash script, its purpose, and functionality. It guides you through the entire setup process and how to access the web pages served by the cluster. We hope this documentation enables you to explore and experiment with your cluster environment efficiently.
 
-- Load Balancer: http://192.168.33.10/load-balancer.html
-- PHP Info: http://192.168.33.10/info.php
-
-## 6. Troubleshooting
-
-If you encounter any issues during the script execution, consider the following troubleshooting steps:
-
-- Ensure that Vagrant and VirtualBox are installed correctly.
-- Review the script's output and error messages for clues on what went wrong.
-
-## 7. Notes
-
-- The script contains conditional checks for dependency installation, which are commented out since they are tailored for Ubuntu environments. Uncomment and adapt these sections if you run the script on Ubuntu.
-- Nginx is installed as the load balancer, but the configuration to start and enable it is commented out. Uncomment and configure it as needed.
+Happy clustering!

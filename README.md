@@ -1,74 +1,62 @@
-# Vagrant Ubuntu Cluster with LAMP Stack on Master and Slave Nodes, and Load Balancer
+# Cloud Second Semester Bash Script Project
 
-## Overview
-
-This Bash script automates the setup of a Vagrant cluster with two nodes, one acting as a master and the other as a slave. Both nodes are configured with a LAMP (Linux, Apache, MySQL, PHP) stack. Additionally, a load balancer is installed on the master node using Nginx to distribute incoming traffic between the master and slave nodes.
+This repository contains a Bash script and Vagrant configuration for setting up a simple load-balanced environment using Vagrant and Nginx. The environment includes a master node, a slave node, and a load balancer.
 
 ## Prerequisites
 
-Before running this script, ensure you have the following prerequisites:
+Before running the script, ensure you have the following prerequisites:
 
-1. [Vagrant](https://www.vagrantup.com/) installed.
-2. [VirtualBox](https://www.virtualbox.org/) installed.
-3. A Windows test environment (if running on Windows).
+- [Vagrant](https://www.vagrantup.com/downloads) installed
+- [VirtualBox](https://www.virtualbox.org/wiki/Downloads) installed
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed (if cloning the repository)
 
-## Usage
+## Getting Started
 
-1. Clone this repository or copy the Bash script to your local machine.
-
-2. Open a terminal and navigate to the directory containing the script.
-
-3. Make the script executable:
+1. Clone this repository (if not done already) using Git:
 
    ```bash
-   chmod +x deploy_ubuntu_cluster.sh
+   git clone https://github.com/Hamed-altschool/Cloud_second_sems_bashscript_project.git
+   cd Cloud_second_sems_bashscript_project
    ```
 
-4. Run the script:
+2. Open your terminal and navigate to the project directory.
+
+3. Run the Bash script to create and provision the Vagrant environment:
 
    ```bash
-   ./deploy_ubuntu_cluster.sh
+   bash provision_vagrant.sh
    ```
 
-5. Follow the on-screen instructions during script execution.
+   The script will set up the master node, slave node, and load balancer with Nginx. It will also deploy a sample HTML page.
 
-6. Upon successful completion, you can access the following resources:
+4. After the script completes, you can access the load balancer at:
 
-   - Load Balancer: [http://192.168.33.10/load-balancer.html](http://192.168.33.10/load-balancer.html)
-   - PHP Info: [http://192.168.33.10/info.php](http://192.168.33.10/info.php)
+   `http://192.168.56.7/load-balancer.html`
 
-## Script Explanation
+5. Additionally, you can access the PHP info page at:
 
-The script performs the following actions:
+   `http://192.168.56.5/info.php`
 
-1. Checks for and installs required dependencies (commented out for Windows).
+## Documentation
 
-2. Creates a `Shared_folder` directory.
+The documentation for this project is available [here](./Documentation.md).
 
-3. Checks for the existence of a `Vagrantfile` and removes it if present.
+## Configuration
 
-4. Creates a new `Vagrantfile` with predefined configuration settings.
+The main Vagrant configuration is defined in the `Vagrantfile`. The script provisions three virtual machines:
 
-5. Starts and provisions two nodes: "master" and "slave," both with the LAMP stack installed, each with specific settings and provisioning scripts.
+- `master` - The master node
+- `slave` - The slave node
+- `load_balancer` - The load balancer with Nginx
 
-6. SSHs into the master node to perform the following tasks:
-   - Display an overview of running processes.
-   - Creates a cron job that runs the ps aux command at every boot
-   - Checks for the existence of directories and files.
-   - Validates the content of the test file.
-
-7. SSHs into the slave node to perform similar directory and file checks.
-
-8. Displays the URLs to access the load balancer and PHP info pages.
-
-## Troubleshooting
-
-If you encounter any issues during the script execution, please check the following:
-
-- Ensure that Vagrant and VirtualBox are installed correctly.
-- Review the script's output and error messages for clues on what went wrong.
+Nginx is configured as a load balancer, distributing traffic between the master and slave nodes.
 
 ## Notes
 
-- The script contains conditional checks for dependency installation, which are commented out since they are tailored for Ubuntu environments. You may uncomment and adapt these sections if you run the script on Ubuntu.
-- Nginx is installed as the load balancer, but the configuration to start and enable it is commented out. Uncomment and configure it as needed.
+- The provisioning script assumes that VirtualBox and Vagrant are installed. The script will check for dependencies and install them if needed. However, this check is commented out because the provided environment is on Windows, and the installation may differ.
+
+- Be aware that this script is designed for a specific setup and might need adjustments for different environments.
+
+Feel free to explore the repository, documentation, and test pages and adapt the scripts for your specific requirements. If you encounter any issues or have questions, please [open an issue](https://github.com/Hamed-altschool/Cloud_second_sems_bashscript_project/issues).
+
+Enjoy your load-balanced Vagrant environment!

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit script immediately if any command fails
-set -e
+# set -e
 
 # Installing dependencies
 # Check if vagrant is installed
@@ -24,20 +24,52 @@ set -e
 
 # the above commands are commented out because they will not work in my windows test environment
 
+# Check if there are any run instances and destroy them
+if [ $(vagrant status | grep -c 'running') -gt 0 ]; then
+  echo "There are running instances."
+  echo "Destroying running instances."
+  vagrant destroy -f
+  echo "Running instances have been destroyed."
+else
+  echo "There are no running instances."
+fi
+
+# Check if the shared_folder exists
+if [ -d Shared_folder ]; then
+  echo "An old Shared_folder directory exists."
+  echo "Removing the old Shared_folder directory."
+  rm -rf Shared_folder
+  echo "The old Shared_folder directory has been removed."
+else
+  echo "The Shared_folder directory does not exist."
+fi
+
 # Create a Shared_folder directory
-echo "Creating a Shared_folder directory."
+echo "Creating a new Shared_folder directory."
 mkdir -p Shared_folder
+
+# Check if the .vagrant directory exists
+if [ -d .vagrant ]; then
+  echo "An old .vagrant directory exists."
+  echo "Removing the old .vagrant directory."
+  rm -rf .vagrant
+  echo "The old .vagrant directory has been removed."
+else
+  echo "The .vagrant directory does not exist."
+fi
 
 # Check if Vagrantfile exists and remove it
 if [ -e Vagrantfile ]; then
-  echo "Removing Vagrantfile."
+  echo "Vagrantfile exists."
+  echo "Removing old Vagrantfile."
   rm Vagrantfile
+  echo "Old Vagrantfile has been removed."
 else
   echo "Vagrantfile does not exist."
 fi
 
 # Create Vagrantfile
-echo "Creating Vagrantfile."
+echo "Creating a new Vagrantfile."
 touch Vagrantfile
 
 # Edit Vagrantfile
@@ -54,7 +86,7 @@ Vagrant.configure("2") do |config|
   # Create a master node
   config.vm.define "master" do |master|
     master.vm.hostname = "master-node"
-    master.vm.network "private_network", ip: "192.168.33.10"
+    master.vm.network "private_network", ip: "192.168.56.5"
 
     master.vm.provider "virtualbox" do |vb|
       vb.memory = "2048"
@@ -66,7 +98,7 @@ Vagrant.configure("2") do |config|
       # Update and upgrade master node
       echo "Updating and upgrading master node."
       sudo apt-get update
-      # sudo apt-get -y upgrade
+      sudo apt-get -y upgrade
 
       # Create a user called altschool with a default passwords and give it root privileges
       echo "Creating altschool user."
@@ -77,7 +109,7 @@ Vagrant.configure("2") do |config|
 
       # Generate an SSH key pair for 'altschool' user (without a passphrase)
       echo "Generating an SSH key pair for 'altschool' user (without a passphrase)."
-      sudo -u altschool ssh-keygen -t rsa -N "" -f /home/altschool/.ssh/id_rsa -q
+      sudo -u altschool ssh-keygen -t rsa -N "" -f /home/altschool/.ssh/id_rsa -C "altschool" -q
 
       # Copy the public key to the shared folder
       echo "Copying the public key to the shared folder."
@@ -89,16 +121,16 @@ Vagrant.configure("2") do |config|
 
       # Start and enable Apache on boot
       echo "Starting and enabling Apache on boot."
-      sudo systemctl start apache2
-      sudo systemctl enable apache2
+      sudo systemctl start apache2 || true
+      sudo systemctl enable apache2 || true
 
       # Start and enable MySQL on boot and secure MySQL
       echo "Starting and enabling MySQL on boot and securing MySQL."
       # Secure MySQL installation and initialize it with a default user and password
       sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password altschool'
       sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password altschool'
-      sudo systemctl start mysql
-      sudo systemctl enable mysql
+      sudo systemctl start mysql || true
+      sudo systemctl enable mysql || true
       echo "Securing MySQL completed successfully."
 
       # Create a sample PHP file for validation
@@ -122,41 +154,6 @@ Vagrant.configure("2") do |config|
       # Copy the content of the /mnt/altschool/ directory to the shared folder
       echo "Copying the content of the /mnt/altschool/ directory to the shared folder."
       sudo cp -r /mnt/altschool/* /vagrant/ || true
-
-      # install nginx
-      echo "Installing nginx."
-      DEBIAN_FRONTEND=noninteractive sudo apt-get install nginx -y
-
-      # start and enable nginx
-      # echo "Starting and enabling nginx."
-      # sudo systemctl start nginx
-      # sudo systemctl enable nginx
-
-      # Configure nginx as a load balancer for the master and slave nodes
-      echo "Configuring nginx as a load balancer for the master and slave nodes."
-      sudo rm /etc/nginx/sites-enabled/default || true
-
-      # Create a new nginx configuration file
-      echo "Creating a new nginx configuration file."
-      sudo touch /etc/nginx/sites-available/nginx.conf
-
-      # Edit the nginx configuration file
-      echo "Editing the nginx configuration file."
-      sudo echo -e "upstream backend {
-        server 192.168.33.10;
-        server 192.168.33.11;
-      }
-      server {
-        listen 80;
-        server_name localhost;
-        location / {
-          proxy_pass http://backend;
-        }
-      }" > /etc/nginx/sites-available/nginx.conf
-
-      # Create a symbolic link to the nginx configuration file
-      echo "Creating a symbolic link to the nginx configuration file."
-      sudo ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
 
       # Create nginx default page
       echo "Creating nginx default page."
@@ -201,21 +198,16 @@ Vagrant.configure("2") do |config|
           </div>
       </body>
       </html>" > /var/www/html/load-balancer.html
-
-      # Reload and Restart nginx
-      # echo "Reloading and restarting nginx."
-      # sudo systemctl reload nginx
-      # sudo systemctl restart nginx
     SHELL
   end
 
   # Create a slave node
   config.vm.define "slave" do |slave|
     slave.vm.hostname = "slave-node"
-    slave.vm.network "private_network", ip: "192.168.33.11"
+    slave.vm.network "private_network", ip: "192.168.56.6"
     slave.vm.provider "virtualbox" do |vb|
-      vb.memory = "2048"
-      vb.cpus = "2"
+      vb.memory = "1024"
+      vb.cpus = "1"
     end
 
     # Provisioning script for the slave node
@@ -223,7 +215,7 @@ Vagrant.configure("2") do |config|
       # Update and upgrade slave node
       echo "Updating and upgrading slave node."
       sudo apt-get update
-      # sudo apt-get -y upgrade
+      sudo apt-get -y upgrade
 
       # Copy the public key from the shared folder to the slave node and append it to the authorized_keys file in the .ssh directory in the vagrant user's home directory
       echo "Copying the public key from the shared folder to the slave node and appending it to the authorized_keys file in the .ssh directory in the vagrant user's home directory."
@@ -252,30 +244,130 @@ Vagrant.configure("2") do |config|
 
       # Start and enable Apache on boot
       echo "Starting and enabling Apache on boot."
-      sudo systemctl start apache2
-      sudo systemctl enable apache2
+      sudo systemctl start apache2 || true
+      sudo systemctl enable apache2 || true
 
       # Start and enable MySQL on boot and secure MySQL
       echo "Starting and enabling MySQL on boot and securing MySQL."
       # Secure MySQL installation and initialize it with a default user and password
       sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password altschool'
       sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password altschool'
-      sudo systemctl start mysql
-      sudo systemctl enable mysql
+      sudo systemctl start mysql || true
+      sudo systemctl enable mysql || true
       echo "Securing MySQL completed successfully."
 
       # Create a sample PHP file for validation
       echo "Creating a sample PHP file for validation."
       echo "<?php phpinfo(); ?>" > /var/www/html/info.php
+
+      # Create nginx default page
+      echo "Creating nginx default page."
+      sudo touch /var/www/html/load-balancer.html
+
+      # Edit nginx default page
+      echo "Editing nginx default page."
+      sudo echo -e "<!DOCTYPE html>
+      <html>
+      <head>
+          <title>Load Balancer!</title>
+          <style>
+              body {
+                  background-color: #f0f0f0;
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+              }
+              .container {
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  height: 100vh;
+              }
+              .message {
+                  text-align: center;
+              }
+              h1 {
+                  color: #333;
+              }
+              p {
+                  color: #666;
+              }
+          </style>
+      </head>
+      <body>
+          <div class=\"container\">
+              <div class=\"message\">
+                  <h1>Welcome!</h1>
+                  <p>You've successfully reached my Welcome page through the load balancer. Enjoy your stay! It is working, I personally made sure of that 😉</p>
+              </div>
+          </div>
+      </body>
+      </html>" > /var/www/html/load-balancer.html
+    SHELL
+  end
+
+  config.vm.define "load_balancer" do |load_balancer|
+    load_balancer.vm.hostname = "load-balancer"
+    load_balancer.vm.network "private_network", ip: "192.168.56.7"
+    load_balancer.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = "1"
+    end
+    load_balancer.vm.provision "shell", inline: <<-SHELL
+      # Update and upgrade load balancer
+      echo "Updating and upgrading load balancer."
+      sudo apt-get update
+      sudo apt-get -y upgrade
+
+      # install nginx
+      echo "Installing nginx."
+      DEBIAN_FRONTEND=noninteractive sudo apt-get install nginx -y
+
+      # start and enable nginx
+      echo "Starting and enabling nginx."
+      sudo systemctl start nginx || true
+      sudo systemctl enable nginx || true
+
+      # Configure nginx as a load balancer for the master and slave nodes
+      echo "Configuring nginx as a load balancer for the master and slave nodes."
+      sudo rm /etc/nginx/sites-enabled/default || true
+
+      # Create a new nginx configuration file
+      echo "Creating a new nginx configuration file."
+      sudo touch /etc/nginx/sites-available/nginx.conf
+
+      # Edit the nginx configuration file
+      echo "Editing the nginx configuration file."
+      sudo echo -e "upstream backend {
+        ip_hash;
+        server 192.168.56.5 weight=2 max_fails=3 fail_timeout=30s;
+        server 192.168.56.6 weight=1 max_fails=3 fail_timeout=30s;
+      }
+      server {
+        listen 80;
+        server_name localhost;
+        location / {
+          proxy_pass http://backend;
+        }
+      }" > /etc/nginx/sites-available/nginx.conf
+
+      # Create a symbolic link to the nginx configuration file
+      echo "Creating a symbolic link to the nginx configuration file."
+      sudo ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
+
+      # Reload and Restart nginx
+      # echo "Reloading and restarting nginx."
+      # sudo systemctl reload nginx || true
+      # sudo systemctl restart nginx || true
     SHELL
   end
 end
 EOF
 
-  # Start master and slave nodes
-  echo 'Starting master and slave nodes.'
-  vagrant destroy -f
-  vagrant up
+# Start master and slave nodes
+echo 'Starting master and slave nodes.'
+vagrant destroy -f
+vagrant up
 
 # Check if vagrant up was successful
 if [ $? -eq 0 ]; then
@@ -292,7 +384,7 @@ echo 'Deployment completed successfully.'
 
 # Create a cronjob that display an overview of the Linux process management, showcasing currently running processes on every boot
 echo 'Creating a cronjob that displays an overview of the Linux process management, showcasing currently running processes on every boot.'
-sudo crontab -u altschool -l | { cat; echo "@reboot ps -aux"; } | sudo crontab -u altschool - || true
+sudo crontab -u altschool -l | { cat; echo \"@reboot ps -aux\"; } | sudo crontab -u altschool - || true
 
 # Check if the /mnt/altschool/ directory exists
 if [ -d /mnt/altschool/ ]; then
@@ -328,6 +420,7 @@ fi
 echo 'Exiting from the master node.'
 exit
 "
+
 # SSH into slave node
 echo "SSH into slave node."
 vagrant ssh slave -c "
@@ -367,6 +460,16 @@ echo 'Exiting from the slave node.'
 exit
 "
 
+# SSH into load_balancer
+echo "SSH into load_balancer."
+vagrant ssh load_balancer -c "
+sudo nginx -t || true
+sudo systemctl reload nginx || true
+sudo systemctl restart nginx || true
+echo 'Exiting from the load_balancer.'
+exit
+"
+
 echo "Deployment complete."
-echo "You can now access the load balancer at http://192.168.33.10/load-balancer.html"
-echo "You can now access the phpinfo.php file at http://192.168.33.10/info.php"
+echo "You can now access the load balancer at http://192.168.56.7/load-balancer.html"
+echo "You can now access the phpinfo.php file at http://192.168.56.5/info.php"
