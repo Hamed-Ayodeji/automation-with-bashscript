@@ -1,4 +1,4 @@
-# Cloud Second Semester Bash Script Project
+# Automating the setup of a simple load-balanced environment using Vagrant and Nginx with Bash script
 
 This repository contains a Bash script and Vagrant configuration for setting up a simple load-balanced environment using Vagrant and Nginx. The environment includes a master node, a slave node, and a load balancer.
 
